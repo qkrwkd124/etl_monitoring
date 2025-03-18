@@ -1,0 +1,88 @@
+version: '3'
+services:
+  nifi:
+    build: 
+      context: .
+      args:
+        - UID
+        - GID
+    image: apache/nifi-custom:latest
+    #image: apache/nifi:1.20.0
+    container_name: nifi
+    user: "1000:1000"
+    group_add:
+      - "11002"
+      - "987" 
+    ports:
+      # Web
+      - 38443:38443
+      # Metrics
+      #- 9102:9102
+    restart: always
+    volumes:
+      # State Files
+      - nifi-state:/opt/nifi/nifi-current/state
+
+      # Repositories
+      - nifi-database_repository:/opt/nifi/nifi-current/database_repository
+      - nifi-flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - nifi-content_repository:/opt/nifi/nifi-current/content_repository
+      - nifi-provenance_repository:/opt/nifi/nifi-current/provenance_repository
+
+      # Config Files
+      - ${CONFIG_PATH:-.}/conf:/opt/nifi/nifi-current/conf
+
+      # Log Files
+      - ${LOG_PATH:-.}/logs:/opt/nifi/nifi-current/logs
+
+      # Common Storage
+      - ${COMMON_STORAGE_PATH:-./storage}:/opt/nifi/nifi-current/storage
+
+      # Custom Script
+      - ${CUSTOM_SCRIPT_PATH:-./custom_scripts}:/opt/nifi/nifi-current/custom_scripts
+
+      # Custom Script_log
+      - ${CUSTOM_SCRIPT_LOG_PATH:-./script_log}:/opt/nifi/nifi-current/script_log
+
+      # docker
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      # /data
+      - /data:/data
+
+    environment:
+      # TimeZone
+      TZ: 'Asia/Seoul'
+      # HTTPS
+      NIFI_WEB_HTTPS_HOST: '0.0.0.0'
+      NIFI_WEB_HTTPS_PORT: 38443
+      NIFI_WEB_PROXY_HOST: '0.0.0.0:38443'
+      # USER
+      SINGLE_USER_CREDENTIALS_USERNAME: ${SINGLE_USER_CREDENTIALS_USERNAME}
+      SINGLE_USER_CREDENTIALS_PASSWORD: ${SINGLE_USER_CREDENTIALS_PASSWORD}
+      # JAVA Heap
+      NIFI_JVM_HEAP_INIT: '4g'
+      NIFI_JVM_HEAP_MAX: '16g'
+      PYTHONPATH: '/opt/nifi/nifi-current/custom_scripts/python/lib/Mobigen'
+
+    healthcheck:
+      test: ["CMD", "curl", "-kf", "https://nifi:38443/nifi"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  nifi-database_repository:
+  nifi-flowfile_repository:
+  nifi-content_repository:
+  nifi-provenance_repository:
+  nifi-state:
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.102.0/24

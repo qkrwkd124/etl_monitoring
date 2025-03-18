@@ -1,0 +1,9 @@
+pandas
+pymysql
+pendulum
+pyparsing
+PyYAML
+pydantic
+requests
+openpyxl
+sqlalchemy
