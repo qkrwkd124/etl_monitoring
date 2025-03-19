@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "nifi_metrics"
+    scheme: 'http'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ["nifi:9092"]  # docker-compose의 서비스명:포트
+    follow_redirects: true  # 리다이렉션 자동 따라가기
+    
+    # 아래 설정 추가
+    fallback_scrape_protocol: "PrometheusText0.0.4"

@@ -17,7 +17,7 @@ services:
       # Web
       - 38443:38443
       # Metrics
-      #- 9102:9102
+      - 9092:9092
     restart: always
     volumes:
       # State Files
@@ -64,13 +64,29 @@ services:
       # JAVA Heap
       NIFI_JVM_HEAP_INIT: '4g'
       NIFI_JVM_HEAP_MAX: '16g'
-      PYTHONPATH: '/opt/nifi/nifi-current/custom_scripts/python/lib/Mobigen'
 
     healthcheck:
       test: ["CMD", "curl", "-kf", "https://nifi:38443/nifi"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090" # Prometheus UI
+
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   user: "1000:1000"
+  #   volumes:
+  #     - ${GRAFANA_DATA}:/var/lib/grafana
+  #   ports:
+  #     - "3000:3000" # Grafana UI
 
 volumes:
   nifi-database_repository:
@@ -79,10 +95,7 @@ volumes:
   nifi-provenance_repository:
   nifi-state:
 
+
 networks:
   default:
     driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 192.168.102.0/24
