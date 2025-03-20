@@ -79,14 +79,14 @@ services:
     ports:
       - "9090:9090" # Prometheus UI
 
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: grafana
-  #   user: "1000:1000"
-  #   volumes:
-  #     - ${GRAFANA_DATA}:/var/lib/grafana
-  #   ports:
-  #     - "3000:3000" # Grafana UI
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    user: "1000:1000"
+    volumes:
+      - ${GRAFANA_DATA}:/var/lib/grafana
+    ports:
+      - "3000:3000" # Grafana UI
 
 volumes:
   nifi-database_repository:
